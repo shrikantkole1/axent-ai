@@ -3,28 +3,27 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../store/AppContext';
 import {
-  Zap, ArrowRight, User as UserIcon, Mail, Lock,
-  Loader2, Sparkles, Eye, EyeOff, CheckCircle2, Brain, Shield, Target, AlertCircle
+  Zap, ArrowRight, User as UserIcon, BookOpen,
+  Loader2, Sparkles, CheckCircle2, Brain, Shield, Target, GraduationCap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { initializeBranchRoadmap } from '../services/geminiService';
 import { auth, db } from '../services/firebase';
-
-const DEFAULT_BRANCH = "Computer Science & Engineering";
+import { ENGINEERING_SYLLABUS } from '../data/syllabus';
 
 export const Auth: React.FC = () => {
   const { setUser, setSubjectsAndTopics } = useApp();
   const navigate = useNavigate();
   const [isInitializing, setIsInitializing] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    password: ''
+    branch: '',
+    year: '1'
   });
+
+  const branches = ENGINEERING_SYLLABUS.map(b => b.branch);
 
   // Check database connection
   useEffect(() => {
@@ -36,7 +35,6 @@ export const Auth: React.FC = () => {
           setDbStatus('disconnected');
         }
       } catch (error) {
-        console.error('Database connection error:', error);
         setDbStatus('disconnected');
       }
     };
@@ -46,14 +44,19 @@ export const Auth: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name || !formData.branch) return;
+
     setIsInitializing(true);
 
     try {
       // Create a local user identity
       const userId = 'user-' + Date.now();
 
-      // Generate roadmap using Tambo AI with default branch
-      const roadmap = await initializeBranchRoadmap(userId, DEFAULT_BRANCH);
+      // Auto-generate a dummy email for type compatibility
+      const dummyEmail = `${formData.name.toLowerCase().replace(/\s+/g, '.')}@student.axent`;
+
+      // Generate roadmap using Tambo AI based on selected branch
+      const roadmap = await initializeBranchRoadmap(userId, formData.branch);
 
       if (roadmap.subjects.length > 0) {
         setSubjectsAndTopics(roadmap.subjects, roadmap.topics);
@@ -62,8 +65,9 @@ export const Auth: React.FC = () => {
       setUser({
         id: userId,
         name: formData.name,
-        email: formData.email,
-        branch: DEFAULT_BRANCH,
+        email: dummyEmail,
+        branch: formData.branch,
+        year: parseInt(formData.year),
         energyPreference: 'morning', // Default
         dailyStudyHours: 4 // Default
       });
@@ -72,7 +76,7 @@ export const Auth: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       setIsInitializing(false);
-      alert("Login failed. Please check your connection and try again.");
+      alert("Setup failed. Please check your connection and try again.");
     }
   };
 
@@ -93,9 +97,9 @@ export const Auth: React.FC = () => {
             >
               <Sparkles size={64} />
             </motion.div>
-            <h2 className="text-4xl font-black mb-4 tracking-tight">Setting up your workspace...</h2>
+            <h2 className="text-4xl font-black mb-4 tracking-tight">Personalizing your experience...</h2>
             <p className="text-indigo-100 text-lg max-w-md font-medium opacity-80 mb-10 italic">
-              "Axent AI is preparing your personalized study environment."
+              "Building a custom roadmap for {formData.branch}..."
             </p>
             <div className="w-64 h-2 bg-indigo-500 rounded-full overflow-hidden shadow-inner relative">
               <motion.div
@@ -104,9 +108,6 @@ export const Auth: React.FC = () => {
                 transition={{ duration: 8 }}
                 className="h-full bg-white shadow-[0_0_15px_white]"
               />
-            </div>
-            <div className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/60">
-              <Sparkles size={14} /> Intelligence by Axent AI
             </div>
           </motion.div>
         )}
@@ -117,7 +118,7 @@ export const Auth: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-16"
+          className="mb-10"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">
@@ -128,31 +129,24 @@ export const Auth: React.FC = () => {
             </span>
           </div>
 
-          {/* Database Status Indicator */}
-          {/* Database Status Indicator */}
           <div className="flex flex-col gap-1 mb-6">
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold w-fit ${dbStatus === 'connected' ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400' :
               dbStatus === 'disconnected' ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400' :
                 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400'
               }`}>
               {dbStatus === 'connected' && <CheckCircle2 size={14} />}
-              {dbStatus === 'disconnected' && <AlertCircle size={14} />}
+              {dbStatus === 'disconnected' && <CheckCircle2 size={14} />}
+              {/* Using CheckCircle regardless of connection to reduce friction since auth is simplified */}
               {dbStatus === 'checking' && <Loader2 size={14} className="animate-spin" />}
-              {dbStatus === 'connected' ? 'Database Connected' : dbStatus === 'disconnected' ? 'Using Local Storage' : 'Checking connection...'}
+              {dbStatus === 'connected' ? 'System Online' : 'Local Mode Ready'}
             </div>
-            {dbStatus === 'disconnected' && (
-              <p className="text-[10px] text-slate-400 font-medium px-1">
-                Note: Firebase is offline. Data will be saved locally. <br />
-                Recent config change? <button onClick={() => window.location.reload()} className="underline hover:text-indigo-500">Reload</button>
-              </p>
-            )}
           </div>
 
           <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
-            {isSignUp ? 'Create Your Account' : 'Welcome Back'}
+            Start Your Journey
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
-            {isSignUp ? 'Start your AI-powered learning journey today.' : 'Sign in to continue your study journey.'}
+            Enter your details to generate your personalized engineering roadmap.
           </p>
         </motion.div>
 
@@ -163,64 +157,62 @@ export const Auth: React.FC = () => {
           onSubmit={handleSubmit}
           className="space-y-6 max-w-md"
         >
-          {isSignUp && (
-            <div>
-              <label className="block text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
-                Full Name
-              </label>
-              <div className="relative">
-                <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                  placeholder="Enter your name"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
           <div>
             <label className="block text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
-              Email Address
+              Full Name
             </label>
             <div className="relative">
-              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
+              <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
               <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                placeholder="you@example.com"
+                placeholder="Enter your name"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full pl-14 pr-14 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
+                Branch
+              </label>
+              <div className="relative">
+                <BookOpen className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
+                <select
+                  value={formData.branch}
+                  onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                  className="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-500 transition-all text-slate-900 dark:text-white appearance-none cursor-pointer"
+                  required
+                >
+                  <option value="" disabled>Select Branch</option>
+                  {branches.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
+                Year
+              </label>
+              <div className="relative">
+                <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+                <select
+                  value={formData.year}
+                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                  className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-500 transition-all text-slate-900 dark:text-white appearance-none cursor-pointer"
+                  required
+                >
+                  <option value="1">1st</option>
+                  <option value="2">2nd</option>
+                  <option value="3">3rd</option>
+                  <option value="4">4th</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -236,22 +228,11 @@ export const Auth: React.FC = () => {
               </>
             ) : (
               <>
-                {isSignUp ? 'Create Account' : 'Sign In'}
+                Enter Dashboard
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
-
-          {/* Toggle between Login and Signup */}
-          <div className="text-center pt-4">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </button>
-          </div>
         </motion.form>
 
         {/* Trust Indicators */}
@@ -263,7 +244,7 @@ export const Auth: React.FC = () => {
         >
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="text-emerald-500 dark:text-emerald-400" />
-            Free Forever
+            No Sign Up Required
           </div>
           <div className="flex items-center gap-2">
             <Brain size={16} className="text-indigo-500 dark:text-indigo-400" />
@@ -271,7 +252,7 @@ export const Auth: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <Shield size={16} className="text-violet-500 dark:text-violet-400" />
-            Secure Platform
+            Local & Privacy First
           </div>
         </motion.div>
       </div>
@@ -314,7 +295,7 @@ export const Auth: React.FC = () => {
             transition={{ delay: 0.6 }}
             className="text-xl text-indigo-100 font-medium leading-relaxed mb-12"
           >
-            Personalized learning paths, intelligent scheduling, and AI-powered insights to help you excel in your engineering studies.
+            Skip the setup. Jump straight into personalized learning paths and intelligent scheduling tailored for your branch.
           </motion.p>
 
           <motion.div
