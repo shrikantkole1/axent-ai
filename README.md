@@ -5,6 +5,10 @@
 
 **Adaptive AI-powered planning that helps you study smarter, not longer.**
 
+<div align="center">
+🔗 <strong>Live Demo:</strong> https://axent-ai.vercel.app/
+</div>
+
 </div>
 
 ---
