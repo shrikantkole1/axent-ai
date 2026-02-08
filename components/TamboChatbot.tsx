@@ -13,7 +13,7 @@ import {
   generateAdaptiveStudyPlan
 } from '../services/geminiService';
 
-const TAMBO_API_KEY = import.meta.env.VITE_TAMBO_API_KEY ?? '';
+
 
 function createTamboTools(
   user: User | null,
@@ -466,7 +466,10 @@ export const TamboChatbot: React.FC = () => {
     [user, subjects, topics, addSubject, addTopic, setSubjectsAndTopics]
   );
 
-  if (!TAMBO_API_KEY || TAMBO_API_KEY.trim() === '') {
+  const apiKey = import.meta.env.VITE_TAMBO_API_KEY ?? '';
+
+  if (!apiKey || apiKey.trim() === '') {
+    console.warn("TamboChatbot: VITE_TAMBO_API_KEY is missing or empty.");
     return <FallbackChatbotUI />;
   }
 
@@ -488,7 +491,7 @@ export const TamboChatbot: React.FC = () => {
 
   return (
     <TamboProvider
-      apiKey={TAMBO_API_KEY}
+      apiKey={apiKey}
       tools={tools}
       contextHelpers={contextHelpers}
     >
