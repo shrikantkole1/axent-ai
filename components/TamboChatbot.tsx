@@ -380,6 +380,69 @@ function TamboChatbotUI() {
   );
 }
 
+
+function FallbackChatbotUI() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="fixed bottom-8 right-8 z-[100] font-sans">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20, transformOrigin: 'bottom right' }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="mb-4 w-[420px] h-[650px] bg-white rounded-[32px] shadow-[0_24px_80px_-20px_rgba(0,0,0,0.25)] border border-slate-200 overflow-hidden flex flex-col"
+          >
+            <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
+                  <BrainCircuit size={22} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm uppercase tracking-widest">System Error</h3>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                      Offline
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-slate-800 text-slate-400 rounded-xl transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-2">
+                <Zap size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">AI Core Disconnected</h3>
+              <p className="text-slate-500 text-sm max-w-xs">
+                The Tambo Intelligence API key is missing from your environment configuration.
+              </p>
+              <div className="p-4 bg-slate-100 rounded-lg text-xs font-mono text-slate-600 break-all">
+                VITE_TAMBO_API_KEY is not set in .env.local
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-16 h-16 bg-slate-900 text-white rounded-[24px] flex items-center justify-center shadow-2xl relative group"
+      >
+        <div className="absolute inset-0 bg-red-600 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity -z-10 blur-xl"></div>
+        {isOpen ? <X size={28} /> : <Zap size={28} fill="white" />}
+      </motion.button>
+    </div>
+  );
+}
+
 export const TamboChatbot: React.FC = () => {
   const {
     user,
@@ -404,19 +467,7 @@ export const TamboChatbot: React.FC = () => {
   );
 
   if (!TAMBO_API_KEY || TAMBO_API_KEY.trim() === '') {
-    return (
-      <div className="fixed bottom-8 right-8 z-[100]">
-        <a
-          href="https://tambo.co/dashboard"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-16 h-16 bg-slate-900 text-white rounded-[24px] flex items-center justify-center shadow-2xl hover:bg-indigo-600 transition-colors"
-          title="Add VITE_TAMBO_API_KEY to .env.local - Get key at tambo.co"
-        >
-          <Zap size={28} fill="white" />
-        </a>
-      </div>
-    );
+    return <FallbackChatbotUI />;
   }
 
   const contextHelpers = {

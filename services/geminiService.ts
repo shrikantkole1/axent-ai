@@ -301,7 +301,10 @@ export const getTopicDetails = async (topicTitle: string, subjectTitle: string):
 export const generateContent = async (prompt: string): Promise<string> => {
   try {
     const apiKey = import.meta.env.VITE_TAMBO_API_KEY ?? '';
-    if (!apiKey) return "AI service not configured.";
+    if (!apiKey) {
+      console.warn("VITE_TAMBO_API_KEY is missing from environment variables");
+      return "AI service not configured.";
+    }
 
     const client = new TamboAI({ apiKey });
 
