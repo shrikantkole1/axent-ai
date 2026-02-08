@@ -7,7 +7,7 @@ import {
 import { useApp } from '../store/AppContext';
 import { motion } from 'framer-motion';
 import { TamboChatbot } from './TamboChatbot';
-import { AIChatbot } from './AIChatbot';
+
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useApp();
@@ -54,8 +54,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 key={item.path}
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
-                    ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
               >
                 <item.icon size={20} strokeWidth={2} />
@@ -130,7 +130,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </main>
 
       {/* Chatbot */}
-      {(import.meta.env.VITE_TAMBO_API_KEY ?? '').trim() ? <TamboChatbot /> : <AIChatbot />}
+      <TamboChatbot />
     </div>
   );
 };

@@ -263,11 +263,11 @@ function TamboChatbotUI() {
                   <BrainCircuit size={22} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-sm uppercase tracking-widest">Tambo AI Assistant</h3>
+                  <h3 className="font-black text-sm uppercase tracking-widest">Tambo Intelligence</h3>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                      Powered by Tambo
+                      Powered by Tambo Intelligence
                     </span>
                   </div>
                 </div>
@@ -290,7 +290,7 @@ function TamboChatbotUI() {
                 {!hasMessages && (
                   <div className="flex justify-start">
                     <div className="max-w-[85%] p-4 rounded-2xl rounded-tl-none bg-white border border-slate-200 shadow-sm text-slate-700 text-sm leading-relaxed space-y-2">
-                      <p><strong>Hi {user?.name?.split(' ')[0] || 'there'}!</strong> I&apos;m your Tambo AI assistant for Axent. I can:</p>
+                      <p><strong>Hi {user?.name?.split(' ')[0] || 'there'}!</strong> I&apos;m your Tambo Intelligence assistant for Axent. I can:</p>
                       <ul className="list-disc list-inside text-xs space-y-1 text-slate-600">
                         <li><strong>Plan subjects</strong> – &quot;Plan my subject Data Structures&quot;</li>
 
@@ -358,7 +358,7 @@ function TamboChatbotUI() {
                   </span>
                   <div className="flex items-center gap-1">
                     <Sparkles size={10} className="text-indigo-400" />
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tambo AI</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tambo Intelligence</span>
                   </div>
                 </div>
               </div>
